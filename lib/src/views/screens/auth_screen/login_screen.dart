@@ -1,6 +1,7 @@
 import 'package:ecommerce_app/constants.dart';
 import 'package:ecommerce_app/src/views/components/login_form.dart';
 import 'package:flutter/material.dart';
+import '../tab_screens/tab_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -41,7 +42,9 @@ class _LoginScreenState extends State<LoginScreen> {
                     // hay que validar el formulario y si esta correcto
                     // llamar al metodo para ejecutar el login
                     if(_formKey.currentState!.validate()){
-
+                      Navigator.push(context, MaterialPageRoute(builder: (context) {
+                        return TabScreen();
+                      },));
                     }
                   },
                   child: Text("Login"),

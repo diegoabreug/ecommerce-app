@@ -1,5 +1,6 @@
 import 'package:ecommerce_app/src/views/screens/auth_screen/login_screen.dart';
-import 'package:ecommerce_app/src/views/screens/auth_screen/register_screen.dart'; // Asegúrate de tener esta importación
+import 'package:ecommerce_app/src/views/screens/auth_screen/register_screen.dart';
+import 'package:ecommerce_app/src/views/screens/tab_screens/tab_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:ecommerce_app/src/themes/app_themes.dart';
 
@@ -21,11 +22,14 @@ class IntecEcommerceApp extends StatelessWidget {
     return MaterialApp(
       title: 'Material App',
       theme: AppThemes.lightTheme(context),
-      initialRoute: LoginScreen.routeName,
-      routes: {
-        LoginScreen.routeName: (context) => const LoginScreen(),
-        RegisterScreen.routeName: (context) => const RegisterScreen(),
-      },
+      home: TabScreen(),
+      
+        // theme: AppThemes.lightTheme(context),
+      // initialRoute: LoginScreen.routeName,
+      // routes: {
+      //   LoginScreen.routeName: (context) => const LoginScreen(),
+      //   RegisterScreen.routeName: (context) => const RegisterScreen(),
+      // },
     );
   }
 }
