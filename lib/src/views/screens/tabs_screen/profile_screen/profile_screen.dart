@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:ecommerce_app/src/controllers/user_controller.dart'; // Asegúrate que la ruta sea correcta
+import 'package:ecommerce_app/src/controllers/user_controller.dart';
 import '../../../../models/user_model.dart';
 import 'edit_profile_screen.dart';
+import '../../auth_screen/login_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -11,20 +12,19 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  // Configuración de colores para el diseño "Premium Foodie"
+  // Configuración de colores
   final Color accentColor = const Color(0xFFFF9500);
   final Color bgColor = const Color(0xFFFBFBFF);
 
   // Instancia del controlador
   final UserController _userController = UserController();
 
-  // Variable para el stream (evita reinicios infinitos)
+  // Variable para el stream
   late Stream<UserModel> _userStream;
 
   @override
   void initState() {
     super.initState();
-    // Inicializamos el stream una sola vez al cargar la pantalla
     _userStream = _userController.getUserData();
   }
 
@@ -35,24 +35,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
       body: StreamBuilder<UserModel>(
         stream: _userStream,
         builder: (context, snapshot) {
-          // 1. Estado de carga
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator(color: Color(0xFFFF9500)));
           }
 
-          // 2. Estado de error
           if (snapshot.hasError) {
-            return Center(child: Text("Error al cargar perfil: ${snapshot.error}"));
+            return Center(child: Text("Error loading profile: ${snapshot.error}"));
           }
 
-          // 3. Si no hay datos
           if (!snapshot.hasData) {
-            return const Center(child: Text("No se encontró información del usuario"));
+            return const Center(child: Text("User information not found"));
           }
 
           final user = snapshot.data!;
 
-          // 4. UI con datos reales
           return SingleChildScrollView(
             child: Column(
               children: [
@@ -62,13 +58,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   child: Column(
                     children: [
                       const SizedBox(height: 25),
+                      // Tarjeta modificada (ahora es Coupons)
                       _buildLoyaltyCard(),
-                      const SizedBox(height: 25),
-                      _buildQuickActions(),
+
+                      // Se eliminó _buildQuickActions() aquí
+
                       const SizedBox(height: 30),
                       _buildMenuSection(context, user),
                       const SizedBox(height: 40),
-                      _buildLogoutButton(),
+                      _buildLogoutButton(context),
                       const SizedBox(height: 20),
                     ],
                   ),
@@ -125,11 +123,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
           const SizedBox(height: 15),
           Text(
-            user.fullName.isNotEmpty ? user.fullName : "Usuario",
+            user.fullName.isNotEmpty ? user.fullName : "User",
             style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w800, letterSpacing: -0.5),
           ),
           Text(
-            _userController.auth.currentUser?.email ?? "Sin correo registrado",
+            _userController.auth.currentUser?.email ?? "No email registered",
             style: const TextStyle(color: Colors.grey, fontSize: 14),
           ),
         ],
@@ -153,7 +151,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: const [
-              Text("Nivel Foodie Oro", style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w500)),
+              // CAMBIO: Título actualizado a "Coupons"
+              Text("Coupons", style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w500)),
               SizedBox(height: 5),
               Text("2,450 pts", style: TextStyle(color: Colors.white, fontSize: 28, fontWeight: FontWeight.w900)),
             ],
@@ -161,39 +160,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             decoration: BoxDecoration(color: Colors.white.withOpacity(0.2), borderRadius: BorderRadius.circular(15)),
-            child: const Text("Canjear", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+            child: const Text("Redeem", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
           )
-        ],
-      ),
-    );
-  }
-
-  Widget _buildQuickActions() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        _actionSquare(Icons.confirmation_number_outlined, "Cupones", "3 disp."),
-        _actionSquare(Icons.favorite_border_rounded, "Favoritos", "12 items"),
-        _actionSquare(Icons.location_on_outlined, "Direcciones", "2 activas"),
-      ],
-    );
-  }
-
-  Widget _actionSquare(IconData icon, String title, String sub) {
-    return Container(
-      width: 105,
-      padding: const EdgeInsets.symmetric(vertical: 15),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.02), blurRadius: 10)],
-      ),
-      child: Column(
-        children: [
-          Icon(icon, color: accentColor, size: 28),
-          const SizedBox(height: 8),
-          Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
-          Text(sub, style: const TextStyle(color: Colors.grey, fontSize: 11)),
         ],
       ),
     );
@@ -207,16 +175,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
       ),
       child: Column(
         children: [
-          _menuTile(Icons.person_outline, "Editar mi perfil", () {
-            // NAVEGACIÓN CORREGIDA:
+          _menuTile(Icons.person_outline, "Edit Profile", () {
             Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => EditProfileScreen(user: user))
             );
           }),
-          _menuTile(Icons.history_rounded, "Historial de pedidos", () {}),
-          _menuTile(Icons.payment_outlined, "Métodos de pago", () {}),
-          _menuTile(Icons.headset_mic_outlined, "Soporte y ayuda", () {}),
+          _menuTile(Icons.history_rounded, "Order History", () {}),
+          _menuTile(Icons.payment_outlined, "Payment Methods", () {}),
+          _menuTile(Icons.headset_mic_outlined, "Help & Support", () {}),
         ],
       ),
     );
@@ -231,12 +198,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _buildLogoutButton() {
+  Widget _buildLogoutButton(BuildContext context) {
     return TextButton(
-      onPressed: () {
-        // Lógica para cerrar sesión aquí
+      onPressed: () async {
+        await _userController.auth.signOut();
+
+        if (context.mounted) {
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(builder: (context) => const LoginScreen()),
+                (route) => false,
+          );
+        }
       },
-      child: const Text("Cerrar Sesión", style: TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold, fontSize: 16)),
+      child: const Text("Log Out", style: TextStyle(color: Colors.redAccent, fontWeight: FontWeight.bold, fontSize: 16)),
     );
   }
 }
