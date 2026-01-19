@@ -3,11 +3,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 class LoginForm extends StatelessWidget {
-  const LoginForm({super.key, required this.formKey});
+  const LoginForm({
+    super.key,
+    required this.formKey,
+    required this.emailController,    // Nuevo
+    required this.passwordController, // Nuevo
+  });
 
-  //para validar un formulario debemos crear un objeto de tipo globalkey<>
   final GlobalKey<FormState> formKey;
-
+  final TextEditingController emailController;    // Nuevo
+  final TextEditingController passwordController; // Nuevo
 
   @override
   Widget build(BuildContext context) {
@@ -16,7 +21,7 @@ class LoginForm extends StatelessWidget {
       child: Column(
         children: [
           TextFormField(
-
+            controller: emailController, // Asignamos controlador
             validator: emailValidator.call,
             textInputAction: TextInputAction.next,
             keyboardType: TextInputType.emailAddress,
@@ -35,13 +40,13 @@ class LoginForm extends StatelessWidget {
             ),
           ),
 
-
           SizedBox(height: defaultPadding),
+
           TextFormField(
+            controller: passwordController, // Asignamos controlador
             obscureText: true,
             validator: passwordValidator.call,
-            textInputAction: TextInputAction.next,
-            keyboardType: TextInputType.emailAddress,
+            textInputAction: TextInputAction.done, // Cambiado a done
             decoration: InputDecoration(
               hintText: "Password",
               prefixIcon: Padding(
@@ -56,7 +61,6 @@ class LoginForm extends StatelessWidget {
               ),
             ),
           ),
-
         ],
       ),
     );

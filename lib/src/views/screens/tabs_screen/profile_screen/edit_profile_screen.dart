@@ -1,10 +1,8 @@
-// lib/src/views/screens/edit_profile_screen.dart
-
 import 'dart:io';
+import 'package:ecommerce_app/src/controllers/user_controller.dart';
+import 'package:ecommerce_app/src/models/user_model.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:ecommerce_app/src/controllers/user_controller.dart';
-import '../../../../models/user_model.dart';
 
 class EditProfileScreen extends StatefulWidget {
   final UserModel user;
@@ -15,8 +13,8 @@ class EditProfileScreen extends StatefulWidget {
 }
 
 class _EditProfileScreenState extends State<EditProfileScreen> {
-  final _formKey = GlobalKey<FormState>();
   final UserController _userController = UserController();
+  final _formKey = GlobalKey<FormState>();
 
   late TextEditingController _firstNameController;
   late TextEditingController _lastNameController;
@@ -29,60 +27,54 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   @override
   void initState() {
     super.initState();
-    // Precargamos los datos del usuario en los controladores
     _firstNameController = TextEditingController(text: widget.user.firstName);
     _lastNameController = TextEditingController(text: widget.user.lastName);
     _bioController = TextEditingController(text: widget.user.bio);
     _phoneController = TextEditingController(text: widget.user.phone);
   }
 
-  Future<void> _pickImage() async {
-    final ImagePicker picker = ImagePicker();
-    final XFile? selectedImage = await picker.pickImage(source: ImageSource.gallery);
-    if (selectedImage != null) {
+  // Seleccionar imagen de la galería
+  _selectImage() async {
+    final ImagePicker _picker = ImagePicker();
+    final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
+    if (image != null) {
       setState(() {
-        _imageFile = selectedImage;
+        _imageFile = image;
       });
     }
   }
 
-  Future<void> _saveProfile() async {
+  _saveProfile() async {
     if (_formKey.currentState!.validate()) {
       setState(() => _isLoading = true);
 
-      try {
-        // 1. Si hay una nueva imagen, súbela primero
-        if (_imageFile != null) {
-          await _userController.uploadProfileImage(_imageFile!);
-        }
+      String? imageUrl;
 
-        // 2. Actualiza los demás datos de texto
-        Map<String, dynamic> dataToUpdate = {
-          'firstName': _firstNameController.text.trim(),
-          'lastName': _lastNameController.text.trim(),
-          'fullName': '${_firstNameController.text.trim()} ${_lastNameController.text.trim()}',
-          'bio': _bioController.text.trim(),
-          'phone': _phoneController.text.trim(),
-        };
+      // 1. Si el usuario eligió una foto nueva, la subimos
+      if (_imageFile != null) {
+        imageUrl = await _userController.uploadProfileImage(_imageFile!);
+      }
 
-        await _userController.updateUserData(dataToUpdate);
+      // 2. Actualizamos los datos
+      String res = await _userController.updateUserData(
+        firstName: _firstNameController.text,
+        lastName: _lastNameController.text,
+        bio: _bioController.text,
+        phone: _phoneController.text,
+        profileImageUrl: imageUrl,
+      );
 
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Perfil actualizado con éxito')),
-          );
-          Navigator.of(context).pop();
-        }
-      } catch (e) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Error al actualizar: $e')),
-          );
-        }
-      } finally {
-        if(mounted) {
-          setState(() => _isLoading = false);
-        }
+      setState(() => _isLoading = false);
+
+      if (res == 'Success') {
+        Navigator.pop(context); // Regresamos al perfil
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Perfil actualizado correctamente")),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(res)),
+        );
       }
     }
   }
@@ -91,50 +83,61 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Editar Perfil'),
+        title: const Text("Editar Perfil", style: TextStyle(color: Colors.black)),
+        backgroundColor: Colors.white,
+        elevation: 0,
+        leading: const BackButton(color: Colors.black),
         actions: [
-          _isLoading
-              ? const Padding(
-            padding: EdgeInsets.all(16.0),
-            child: SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.blue)),
-          )
-              : IconButton(
-            icon: const Icon(Icons.check),
+          TextButton(
             onPressed: _saveProfile,
-          ),
+            child: const Text("Guardar", style: TextStyle(fontSize: 16)),
+          )
         ],
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : SingleChildScrollView(
+        padding: const EdgeInsets.all(20),
         child: Form(
           key: _formKey,
           child: Column(
             children: [
-              _buildImagePicker(),
-              const SizedBox(height: 24),
-              TextFormField(
-                controller: _firstNameController,
-                decoration: const InputDecoration(labelText: 'Nombre'),
-                validator: (value) => value!.isEmpty ? 'Campo requerido' : null,
+              // Área de la Foto
+              GestureDetector(
+                onTap: _selectImage,
+                child: Stack(
+                  children: [
+                    CircleAvatar(
+                      radius: 50,
+                      backgroundColor: Colors.grey.shade200,
+                      backgroundImage: _imageFile != null
+                          ? FileImage(File(_imageFile!.path)) as ImageProvider
+                          : (widget.user.profileImageUrl.isNotEmpty
+                          ? NetworkImage(widget.user.profileImageUrl)
+                          : const AssetImage('assets/images/user.png')),
+                    ),
+                    Positioned(
+                      bottom: 0,
+                      right: 0,
+                      child: CircleAvatar(
+                        radius: 16,
+                        backgroundColor: Colors.blue,
+                        child: const Icon(Icons.camera_alt, color: Colors.white, size: 16),
+                      ),
+                    ),
+                  ],
+                ),
               ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: _lastNameController,
-                decoration: const InputDecoration(labelText: 'Apellido'),
-                validator: (value) => value!.isEmpty ? 'Campo requerido' : null,
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: _bioController,
-                decoration: const InputDecoration(labelText: 'Biografía'),
-                maxLines: 3,
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: _phoneController,
-                decoration: const InputDecoration(labelText: 'Teléfono'),
-                keyboardType: TextInputType.phone,
-              ),
+              const SizedBox(height: 10),
+              const Text("Cambiar foto", style: TextStyle(color: Colors.blue)),
+
+              const SizedBox(height: 30),
+
+              // Campos de texto
+              _buildTextField("Nombre", _firstNameController),
+              _buildTextField("Apellido", _lastNameController),
+              _buildTextField("Biografía", _bioController, maxLines: 3),
+              _buildTextField("Teléfono", _phoneController, isPhone: true),
             ],
           ),
         ),
@@ -142,37 +145,19 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     );
   }
 
-  Widget _buildImagePicker() {
-    return Center(
-      child: Column(
-        children: [
-          CircleAvatar(
-            radius: 50,
-            backgroundColor: Colors.grey.shade200,
-            backgroundImage: _imageFile != null
-                ? FileImage(File(_imageFile!.path))
-                : (widget.user.profileImageUrl.isNotEmpty
-                ? NetworkImage(widget.user.profileImageUrl)
-                : null) as ImageProvider?,
-            child: (_imageFile == null && widget.user.profileImageUrl.isEmpty)
-                ? const Icon(Icons.person, size: 50, color: Colors.grey)
-                : null,
-          ),
-          TextButton(
-            onPressed: _pickImage,
-            child: const Text('Cambiar foto de perfil'),
-          ),
-        ],
+  Widget _buildTextField(String label, TextEditingController controller, {bool isPhone = false, int maxLines = 1}) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 20),
+      child: TextFormField(
+        controller: controller,
+        keyboardType: isPhone ? TextInputType.phone : TextInputType.text,
+        maxLines: maxLines,
+        decoration: InputDecoration(
+          labelText: label,
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+          floatingLabelBehavior: FloatingLabelBehavior.always,
+        ),
       ),
     );
-  }
-
-  @override
-  void dispose() {
-    _firstNameController.dispose();
-    _lastNameController.dispose();
-    _bioController.dispose();
-    _phoneController.dispose();
-    super.dispose();
   }
 }

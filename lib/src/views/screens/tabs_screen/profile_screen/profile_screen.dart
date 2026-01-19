@@ -1,41 +1,29 @@
-// lib/src/views/screens/profile_screen.dart
-
 import 'package:flutter/material.dart';
 import 'package:ecommerce_app/src/controllers/user_controller.dart';
-import '../../../../models/user_model.dart';
-import 'edit_profile_screen.dart';
+import 'package:ecommerce_app/src/models/user_model.dart';
+import 'package:ecommerce_app/src/views/screens/tabs_screen/profile_screen/edit_profile_screen.dart';
 
-class ProfileScreen extends StatefulWidget {
+class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
 
   @override
-  State<ProfileScreen> createState() => _ProfileScreenState();
-}
-
-class _ProfileScreenState extends State<ProfileScreen> {
-  final UserController _userController = UserController();
-
-  @override
   Widget build(BuildContext context) {
+    final UserController _userController = UserController();
+
     return Scaffold(
-      backgroundColor: Colors.white, // Fondo blanco estilo Instagram
+      backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
-        centerTitle: true,
         title: const Text(
-          'Mi Perfil',
-          style: TextStyle(
-              color: Colors.black,
-              fontWeight: FontWeight.bold,
-              fontSize: 18
-          ),
+          "Mi Cuenta",
+          style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.logout, color: Colors.redAccent),
+            icon: const Icon(Icons.settings_outlined, color: Colors.black),
             onPressed: () {
-              // Lógica para cerrar sesión
+              // Aquí podrías ir a ajustes generales de la app
             },
           ),
         ],
@@ -46,92 +34,95 @@ class _ProfileScreenState extends State<ProfileScreen> {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           }
-          if (snapshot.hasError) {
-            return Center(child: Text('Error: ${snapshot.error}'));
-          }
+
           if (!snapshot.hasData) {
-            return const Center(child: Text('Usuario no encontrado.'));
+            return const Center(child: Text("No se encontraron datos"));
           }
 
-          final user = snapshot.data!;
+          UserModel user = snapshot.data!;
 
           return SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 10),
+            padding: const EdgeInsets.all(20),
             child: Column(
               children: [
-                const SizedBox(height: 10),
-                // 1. Avatar Central
-                _buildAvatar(user),
-
+                // 1. Foto de Perfil
+                Center(
+                  child: Stack(
+                    children: [
+                      CircleAvatar(
+                        radius: 55,
+                        backgroundColor: Colors.grey.shade200,
+                        backgroundImage: user.profileImageUrl.isNotEmpty
+                            ? NetworkImage(user.profileImageUrl)
+                            : const AssetImage('assets/images/user.png') as ImageProvider,
+                      ),
+                      Positioned(
+                        bottom: 0,
+                        right: 0,
+                        child: Container(
+                          height: 35,
+                          width: 35,
+                          decoration: BoxDecoration(
+                            color: Colors.blue, // Color primario de tu app
+                            shape: BoxShape.circle,
+                            border: Border.all(color: Colors.white, width: 2),
+                          ),
+                          child: IconButton(
+                            padding: EdgeInsets.zero,
+                            icon: const Icon(Icons.edit, color: Colors.white, size: 20),
+                            onPressed: () {
+                              _navigateToEdit(context, user);
+                            },
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
                 const SizedBox(height: 15),
 
-                // 2. Nombre y Bio Centralizados
+                // 2. Nombre Completo
                 Text(
-                  user.fullName,
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.w700,
-                    fontSize: 22,
-                    color: Colors.black87,
-                  ),
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  user.bio.isNotEmpty ? user.bio : 'Sin biografía',
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    fontSize: 15,
-                    color: Colors.black54,
-                    height: 1.4,
-                  ),
+                  user.fullName.isNotEmpty ? user.fullName : "Usuario",
+                  style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
                 ),
 
-                const SizedBox(height: 20),
+                // 3. Biografía corta
+                if (user.bio.isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8),
+                    child: Text(
+                      user.bio,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(color: Colors.grey.shade600),
+                    ),
+                  ),
 
-                // 3. Botón de Editar (Estilo Instagram)
+                const SizedBox(height: 30),
+
+                // 4. Botón grande de Editar
                 SizedBox(
                   width: double.infinity,
-                  height: 45,
+                  height: 50,
                   child: ElevatedButton(
-                    onPressed: () {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (context) => EditProfileScreen(user: user),
-                        ),
-                      );
-                    },
+                    onPressed: () => _navigateToEdit(context, user),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.grey.shade200, // Gris claro
-                      elevation: 0,
-                      foregroundColor: Colors.black, // Texto negro
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
+                      backgroundColor: Colors.black,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                     ),
-                    child: const Text(
-                      'Editar perfil',
-                      style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
-                    ),
+                    child: const Text("Editar Perfil", style: TextStyle(color: Colors.white)),
                   ),
                 ),
 
                 const SizedBox(height: 30),
-
-                // Divisor sutil
-                Divider(color: Colors.grey.shade200, thickness: 1),
-
+                const Divider(),
                 const SizedBox(height: 10),
 
-                // 4. Lista de Información (Estilo Settings limpio)
-                _buildInfoItem(
-                  icon: Icons.phone_iphone,
-                  label: "Teléfono",
-                  value: user.phone.isNotEmpty ? user.phone : "No agregado",
-                ),
-
-                // Aquí podrías agregar más campos si tu modelo crece (Email, Ubicación, etc.)
-                // Ejemplo:
-                // _buildInfoItem(icon: Icons.email_outlined, label: "Correo", value: "usuario@email.com"),
+                // 5. Detalles de Contacto (Estilo lista)
+                _buildProfileOption(Icons.person_outline, "Nombre", user.firstName),
+                _buildProfileOption(Icons.person_outline, "Apellido", user.lastName),
+                _buildProfileOption(Icons.phone_outlined, "Teléfono", user.phone),
+                // Aquí podrías agregar Email (traído desde Auth) o Dirección
               ],
             ),
           );
@@ -140,59 +131,35 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _buildAvatar(UserModel user) {
-    return Container(
-      padding: const EdgeInsets.all(3), // Borde blanco simulado
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        border: Border.all(color: Colors.grey.shade300, width: 2),
-      ),
-      child: CircleAvatar(
-        radius: 60, // Avatar grande y central
-        backgroundColor: Colors.grey.shade100,
-        backgroundImage: user.profileImageUrl.isNotEmpty
-            ? NetworkImage(user.profileImageUrl)
-            : null,
-        child: user.profileImageUrl.isEmpty
-            ? Icon(Icons.person, size: 60, color: Colors.grey.shade400)
-            : null,
-      ),
+  void _navigateToEdit(BuildContext context, UserModel user) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => EditProfileScreen(user: user)),
     );
   }
 
-  Widget _buildInfoItem({required IconData icon, required String label, required String value}) {
+  Widget _buildProfileOption(IconData icon, String title, String value) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 12.0),
+      padding: const EdgeInsets.symmetric(vertical: 12),
       child: Row(
         children: [
           Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: Colors.grey.shade50,
+              color: Colors.grey.shade100,
               borderRadius: BorderRadius.circular(10),
             ),
-            child: Icon(icon, color: Colors.black87, size: 22),
+            child: Icon(icon, color: Colors.grey.shade700),
           ),
           const SizedBox(width: 15),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                label,
-                style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.grey.shade600,
-                    fontWeight: FontWeight.w500
-                ),
-              ),
+              Text(title, style: TextStyle(color: Colors.grey.shade500, fontSize: 12)),
               const SizedBox(height: 2),
               Text(
-                value,
-                style: const TextStyle(
-                    fontSize: 16,
-                    color: Colors.black87,
-                    fontWeight: FontWeight.w500
-                ),
+                value.isNotEmpty ? value : "No especificado",
+                style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
               ),
             ],
           ),

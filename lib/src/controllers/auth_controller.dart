@@ -10,30 +10,34 @@ class AuthController{
 
 
   //registrar usuario
-  Future<String> registerUser(String email, String password) async{
+// En lib/src/controllers/auth_controller.dart
 
+  Future<String> registerUser(String email, String password, String fullName, String phone) async {
     String response = "Something went wrong";
-    try{
-      UserCredential userCredential = await _auth.createUserWithEmailAndPassword(email: email, password: password);
-      //debemos guardar el usuario en la base de datos
-      await _firestore.collection("users").doc(userCredential.user!.uid).set(
-          {
-            "fullName": "",
-            "profileImage":"",
-            "email": email,
-            "uid": userCredential.user!.uid,
-            "creationDate": DateTime.now(),
-          }
-      );
-      response = "Success";
+    try {
+      UserCredential userCredential = await _auth.createUserWithEmailAndPassword(
+          email: email, password: password);
 
-    }on FirebaseAuthException catch (e) {
+      // Guardar datos extra en Firestore
+      await _firestore.collection("users").doc(userCredential.user!.uid).set({
+        "fullName": fullName,
+        "profileImage": "",
+        "email": email,
+        "uid": userCredential.user!.uid,
+        "phone": phone, // Agregamos teléfono si lo tienes en el formulario
+        "creationDate": DateTime.now(),
+      });
+
+      response = "Success";
+    } on FirebaseAuthException catch (e) {
       if (e.code == 'weak-password') {
-        response = ('The password provided is too weak.');
+        response = 'The password provided is too weak.';
       } else if (e.code == 'email-already-in-use') {
-        response = ('The account already exists for that email.');
+        response = 'The account already exists for that email.';
+      } else {
+        response = e.message ?? e.code;
       }
-    }catch(e){
+    } catch (e) {
       response = e.toString();
     }
     return response;

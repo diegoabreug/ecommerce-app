@@ -1,3 +1,4 @@
+import 'package:ecommerce_app/src/controllers/auth_controller.dart'; // Importar AuthController
 import 'package:ecommerce_app/src/views/components/register_form.dart';
 import 'package:ecommerce_app/src/views/screens/auth_screen/login_screen.dart';
 import 'package:flutter/material.dart';
@@ -13,6 +14,43 @@ class RegisterScreen extends StatefulWidget {
 
 class _RegisterScreenState extends State<RegisterScreen> {
   final _formKey = GlobalKey<FormState>();
+  final AuthController _authController = AuthController(); // Instancia del AuthController
+
+  // Controladores para capturar texto
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+
+  bool _isLoading = false; // Para mostrar carga mientras registra
+
+  registerUser() async {
+    if (_formKey.currentState!.validate()) {
+      setState(() {
+        _isLoading = true;
+      });
+
+      // Llamamos al metodo modificado del AuthController
+      String res = await _authController.registerUser(
+          _emailController.text,
+          _passwordController.text,
+          _nameController.text,
+          "" // Teléfono vacío por ahora si no hay campo
+      );
+
+      setState(() {
+        _isLoading = false;
+      });
+
+      if (res == 'Success') {
+        // Éxito: Navegar al login o al Home
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Cuenta creada con éxito')));
+        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => LoginScreen()));
+      } else {
+        // Error: Mostrar mensaje
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(res)));
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -27,41 +65,41 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Text('Welcome', style: Theme.of(context).textTheme.headlineSmall,),
-                  SizedBox(
-                    height: defaultPadding / 2,
-                  ),
+                  SizedBox(height: defaultPadding / 2),
                   Text('Create an account'),
+                  SizedBox(height: defaultPadding + 13),
 
-                  SizedBox(height: defaultPadding+13,),
+                  // Pasamos los controladores al Form
+                  RegisterForm(
+                    formKey: _formKey,
+                    nameController: _nameController,
+                    emailController: _emailController,
+                    passwordController: _passwordController,
+                  ),
 
-                  //Widget de formulario de registro
-                  RegisterForm(formKey: _formKey),
+                  SizedBox(height: defaultPadding + 25),
 
-                  // SizedBox(height: defaultPadding+25,),
-                  //
-                  // //Boton de iniciar sesion
-                  ElevatedButton(
-                      onPressed: (){
-                        //Hay que validar el formulario y si esta correcto llamar al
-                        //metodo para ejecutar el login
-                        // if(_formKey.currentState!.validate()){
-                        //
-                        // }
+                  // Botón de Registro actualizado
+                  _isLoading
+                      ? CircularProgressIndicator()
+                      : ElevatedButton(
+                      onPressed: () {
+                        registerUser();
                       },
                       child: Text('Register')
                   ),
+
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text("Already have an account?"),
                       TextButton(
-                        onPressed: (){
-                          //navegar a la pantalla de registro
+                        onPressed: () {
                           Navigator.push(context, MaterialPageRoute(builder: (context) {
                             return LoginScreen();
-                          },));
+                          }));
                         },
-                        child:Text('Login Now',),
+                        child: Text('Login Now'),
                       ),
                     ],
                   ),

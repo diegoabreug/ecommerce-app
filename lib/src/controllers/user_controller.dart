@@ -1,65 +1,66 @@
-// lib/src/controllers/user_controller.dart
-
 import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:ecommerce_app/src/models/user_model.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:image_picker/image_picker.dart';
 
-import '../models/user_model.dart';
-
 class UserController {
-  final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseStorage _storage = FirebaseStorage.instance;
 
-  // Obtener el ID del usuario actual
-  String? getCurrentUserUid() {
-    return _auth.currentUser?.uid;
-  }
-
-  // Obtener la información del usuario desde Firestore
+  // Obtener datos del usuario en tiempo real
   Stream<UserModel> getUserData() {
-    final uid = getCurrentUserUid();
-    if (uid == null) {
-      throw Exception("Usuario no autenticado.");
-    }
-    return _firestore.collection('users').doc(uid).snapshots().map((doc) {
-      if (!doc.exists) {
-        // Puedes crear un usuario por defecto aquí si lo deseas
-        throw Exception("El documento del usuario no existe.");
-      }
-      return UserModel.fromFirestore(doc);
+    String uid = _auth.currentUser!.uid;
+    return _firestore.collection('users').doc(uid).snapshots().map((snapshot) {
+      return UserModel.fromFirestore(snapshot);
     });
   }
 
-  // Actualizar la información del usuario
-  Future<void> updateUserData(Map<String, dynamic> dataToUpdate) async {
-    final uid = getCurrentUserUid();
-    if (uid == null) return;
-    await _firestore.collection('users').doc(uid).update(dataToUpdate);
-  }
+  // Subir imagen a Firebase Storage y obtener URL
+  Future<String> uploadProfileImage(XFile image) async {
+    String uid = _auth.currentUser!.uid;
+    Reference ref = _storage.ref().child('profileImages').child(uid);
 
-  // Subir imagen de perfil y actualizar la URL
-  Future<String> uploadProfileImage(XFile imageFile) async {
-    final uid = getCurrentUserUid();
-    if (uid == null) throw Exception("Usuario no autenticado.");
-
-    // Crear una referencia en Firebase Storage
-    Reference ref = _storage.ref().child('profile_images').child('$uid.jpg');
-
-    // Subir el archivo
-    UploadTask uploadTask = ref.putFile(File(imageFile.path));
-
-    // Esperar a que la subida se complete
+    // Subir archivo
+    UploadTask uploadTask = ref.putFile(File(image.path));
     TaskSnapshot snapshot = await uploadTask;
 
-    // Obtener la URL de descarga
+    // Obtener URL de descarga
     String downloadUrl = await snapshot.ref.getDownloadURL();
-
-    // Actualizar la URL en el documento del usuario en Firestore
-    await updateUserData({'profileImageUrl': downloadUrl});
-
     return downloadUrl;
+  }
+
+  // Actualizar datos del usuario
+  Future<String> updateUserData({
+    required String firstName,
+    required String lastName,
+    required String bio,
+    required String phone,
+    String? profileImageUrl,
+  }) async {
+    String res = "Error";
+    try {
+      String uid = _auth.currentUser!.uid;
+      Map<String, dynamic> data = {
+        'firstName': firstName,
+        'lastName': lastName,
+        'fullName': '$firstName $lastName',
+        'bio': bio,
+        'phone': phone,
+      };
+
+      // Si se subió una nueva imagen, actualizamos también el campo de la URL
+      if (profileImageUrl != null) {
+        data['profileImageUrl'] = profileImageUrl;
+      }
+
+      await _firestore.collection('users').doc(uid).update(data);
+      res = "Success";
+    } catch (e) {
+      res = e.toString();
+    }
+    return res;
   }
 }

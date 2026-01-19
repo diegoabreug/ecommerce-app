@@ -1,10 +1,20 @@
 import 'package:ecommerce_app/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+
 class RegisterForm extends StatelessWidget {
-  const RegisterForm({super.key, required this.formKey});
+  const RegisterForm({
+    super.key,
+    required this.formKey,
+    required this.nameController,    // Nuevo
+    required this.emailController,   // Nuevo
+    required this.passwordController,// Nuevo
+  });
 
   final GlobalKey<FormState> formKey;
+  final TextEditingController nameController;     // Nuevo
+  final TextEditingController emailController;    // Nuevo
+  final TextEditingController passwordController; // Nuevo
 
   @override
   Widget build(BuildContext context) {
@@ -14,17 +24,14 @@ class RegisterForm extends StatelessWidget {
         children: [
           // Field 1: Full Name
           TextFormField(
+            controller: nameController, // Asignar controlador
             validator: (value) {
               if (value == null || value.isEmpty) {
-                // Translated validation error message
                 return 'Please enter your full name.';
               }
               return null;
             },
-            textInputAction: TextInputAction.next,
-            keyboardType: TextInputType.text,
             decoration: InputDecoration(
-              // Translated hint text
               hintText: "Full Name",
               prefixIcon: Padding(
                 padding: const EdgeInsets.symmetric(vertical: defaultPadding * 0.75),
@@ -39,13 +46,11 @@ class RegisterForm extends StatelessWidget {
               ),
             ),
           ),
-
           SizedBox(height: defaultPadding),
-
           // Field 2: Email
           TextFormField(
-            validator: emailValidator.call,
-            textInputAction: TextInputAction.next,
+            controller: emailController, // Asignar controlador
+            validator: emailValidator.call, // Asegúrate de que emailValidator exista en constants.dart
             keyboardType: TextInputType.emailAddress,
             decoration: InputDecoration(
               hintText: "Email",
@@ -62,14 +67,12 @@ class RegisterForm extends StatelessWidget {
               ),
             ),
           ),
-
           SizedBox(height: defaultPadding),
-
           // Field 3: Password
           TextFormField(
+            controller: passwordController, // Asignar controlador
             obscureText: true,
-            validator: passwordValidator.call,
-            textInputAction: TextInputAction.done,
+            validator: passwordValidator.call, // Asegúrate de que passwordValidator exista
             decoration: InputDecoration(
               hintText: "Password",
               prefixIcon: Padding(
