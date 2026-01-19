@@ -1,35 +1,26 @@
-import 'package:ecommerce_app/src/views/screens/auth_screen/login_screen.dart';
-import 'package:ecommerce_app/src/views/screens/auth_screen/register_screen.dart';
-import 'package:ecommerce_app/src/views/screens/tab_screens/tab_screen.dart';
 import 'package:flutter/material.dart';
-import 'package:ecommerce_app/src/themes/app_themes.dart';
+import 'package:firebase_core/firebase_core.dart'; // Si usas Firebase
+import 'package:ecommerce_app/src/views/screens/auth_screen/login_screen.dart';
+import 'firebase_options.dart';
 
-// Cambiamos la función main a asíncrona (async)
 void main() async {
-  // 1. Asegura que la capa de interacción de widgets de Flutter esté vinculada.
-  // Esto es necesario antes de ejecutar cualquier código de Flutter que no sea runApp.
   WidgetsFlutterBinding.ensureInitialized();
-
-  // Opcional: Si tuvieras que inicializar algo como Firebase o bases de datos
-  // await initializeOtherServices();
-
-  runApp(IntecEcommerceApp());
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+  runApp(const MyApp());
 }
 
-class IntecEcommerceApp extends StatelessWidget {
+class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Material App',
-      theme: AppThemes.lightTheme(context),
-      home: TabScreen(),
-      
-        // theme: AppThemes.lightTheme(context),
-      // initialRoute: LoginScreen.routeName,
-      // routes: {
-      //   LoginScreen.routeName: (context) => const LoginScreen(),
-      //   RegisterScreen.routeName: (context) => const RegisterScreen(),
-      // },
+      themeMode: ThemeMode.light,
+      title: 'Ecommerce App',
+      //cambiar despues a LoginScreen
+      home: LoginScreen(),
     );
   }
 }

@@ -36,6 +36,13 @@ dependencies:
   cupertino_icons: ^1.0.8
   form_field_validator: ^1.1.0
   flutter_svg: ^2.2.2
+  firebase_core: ^4.2.1
+  firebase_auth: ^6.1.2
+  cloud_firestore: ^6.1.1
+  image_picker: ^1.2.1
+  cached_network_image: ^3.4.1
+  firebase_storage: ^13.0.5
+
 
 dev_dependencies:
   flutter_test:

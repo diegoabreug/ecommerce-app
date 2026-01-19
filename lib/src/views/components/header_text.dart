@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+
 class HeaderText extends StatelessWidget {
   const HeaderText({super.key, required this.text, required this.color, required this.fontSize});
 
@@ -9,11 +10,12 @@ class HeaderText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Text(text,
+    return Text(
+      text,
       style: TextStyle(
-          color: color,
-          fontSize: fontSize,
-          fontWeight: FontWeight.bold
+        color: color,
+        fontSize: fontSize,
+        fontWeight: FontWeight.bold,
       ),
     );
   }
