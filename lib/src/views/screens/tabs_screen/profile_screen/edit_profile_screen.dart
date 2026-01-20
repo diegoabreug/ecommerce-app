@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:ecommerce_app/src/controllers/user_controller.dart';
 import '../../../../models/user_model.dart';
-import 'package:firebase_auth/firebase_auth.dart'; // Agregado para obtener el email si no está en el modelo
+import 'package:firebase_auth/firebase_auth.dart';
 
 class EditProfileScreen extends StatefulWidget {
   final UserModel user;
@@ -19,7 +19,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
   late TextEditingController _firstNameController;
   late TextEditingController _phoneController;
-  late TextEditingController _emailController; // Controlador para el email
+  late TextEditingController _emailController;
 
   XFile? _imageFile;
   bool _isLoading = false;
@@ -37,7 +37,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     _firstNameController = TextEditingController(text: widget.user.fullName);
     _phoneController = TextEditingController(text: widget.user.phone);
 
-    // Obtenemos el email del usuario actual (o del modelo si lo tiene)
+    // Obtenemos el email del usuario actual
     String email = FirebaseAuth.instance.currentUser?.email ?? "No email found";
     _emailController = TextEditingController(text: email);
   }
@@ -68,14 +68,14 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Profile updated successfully!')), // Traducido
+            const SnackBar(content: Text('Profile updated successfully!')),
           );
           Navigator.of(context).pop();
         }
       } catch (e) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Error: $e')), // Traducido
+            SnackBar(content: Text('Error: $e')),
           );
         }
       } finally {
@@ -92,7 +92,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         elevation: 0,
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
-        title: const Text('My Information', style: TextStyle(fontWeight: FontWeight.w800)), // Traducido
+        title: const Text('My Information', style: TextStyle(fontWeight: FontWeight.w800)),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
@@ -104,22 +104,22 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               _buildImagePicker(),
               const SizedBox(height: 30),
 
-              _inputLabel("Full Name"), // Traducido
+              _inputLabel("Full Name"),
               _buildModernField(_firstNameController, Icons.person_outline),
 
               const SizedBox(height: 20),
 
-              _inputLabel("Email Address"), // Traducido (Nuevo Campo)
+              _inputLabel("Email Address"),
               _buildModernField(_emailController, Icons.email_outlined, isReadOnly: true),
 
               const SizedBox(height: 20),
 
-              _inputLabel("Phone Number"), // Traducido
+              _inputLabel("Phone Number"),
               _buildModernField(_phoneController, Icons.phone_android_outlined, type: TextInputType.phone),
 
               const SizedBox(height: 30),
 
-              _inputLabel("Your Favorite Categories"), // Traducido
+              _inputLabel("Your Favorite Categories"),
               const SizedBox(height: 10),
 
               // Lógica de selección de categorías
@@ -198,7 +198,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
         )
             : const Text(
-          "Save Changes", // Traducido
+          "Save Changes",
           style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
         ),
       ),
@@ -218,7 +218,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       controller: controller,
       keyboardType: type,
       readOnly: isReadOnly, // Bloquea la edición si es true
-      validator: (value) => value!.isEmpty ? 'Required' : null, // Traducido
+      validator: (value) => value!.isEmpty ? 'Required' : null,
       style: TextStyle(color: isReadOnly ? Colors.grey.shade600 : Colors.black),
       decoration: InputDecoration(
         prefixIcon: Icon(icon, color: isReadOnly ? Colors.grey : accentColor),

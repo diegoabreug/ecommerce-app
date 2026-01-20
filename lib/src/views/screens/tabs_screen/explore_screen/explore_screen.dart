@@ -24,7 +24,7 @@ class ExploreScreen extends StatelessWidget {
                           margin: EdgeInsets.symmetric(vertical: 20),
                           alignment: Alignment.centerLeft,
                           child: HeaderText(
-                            text: "Descubre Nuevos Lugares",
+                            text: "Discover new places",
                             color: Colors.black,
                             fontSize: 30,
                           ),

@@ -43,7 +43,8 @@ class AuthController{
   Future<String> loginUser(String email, String password) async{
     String response = "Something went wrong";
     try{
-      UserCredential userCredential = await _auth.signInWithEmailAndPassword(email: email, password: password);
+      // CAMBIO AQUÍ: Eliminamos "UserCredential userCredential ="
+      await _auth.signInWithEmailAndPassword(email: email, password: password);
       response = "Success";
     }
     on FirebaseAuthException catch(e){
@@ -59,4 +60,23 @@ class AuthController{
     }
     return response;
   }
+  // Future<String> loginUser(String email, String password) async{
+  //   String response = "Something went wrong";
+  //   try{
+  //     UserCredential userCredential = await _auth.signInWithEmailAndPassword(email: email, password: password);
+  //     response = "Success";
+  //   }
+  //   on FirebaseAuthException catch(e){
+  //     if(e.code == 'user-not-found'){
+  //       response = 'No user found for that email';
+  //     }
+  //     else if(e.code == 'wrong-password'){
+  //       response = 'Wrong password provided for that user';
+  //     }
+  //   }
+  //   catch(e){
+  //     response = e.toString();
+  //   }
+  //   return response;
+  // }
 }

@@ -57,12 +57,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   padding: const EdgeInsets.symmetric(horizontal: 20),
                   child: Column(
                     children: [
-                      const SizedBox(height: 25),
-                      // Tarjeta modificada (ahora es Coupons)
-                      _buildLoyaltyCard(),
-
-                      // Se eliminó _buildQuickActions() aquí
-
+                      // Se eliminó la sección de Loyalty Card (Coupons) y el espacio extra
                       const SizedBox(height: 30),
                       _buildMenuSection(context, user),
                       const SizedBox(height: 40),
@@ -135,37 +130,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _buildLoyaltyCard() {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(colors: [accentColor, const Color(0xFFFFB74D)]),
-        borderRadius: BorderRadius.circular(25),
-        boxShadow: [
-          BoxShadow(color: accentColor.withOpacity(0.3), blurRadius: 15, offset: const Offset(0, 8))
-        ],
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: const [
-              // CAMBIO: Título actualizado a "Coupons"
-              Text("Coupons", style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w500)),
-              SizedBox(height: 5),
-              Text("2,450 pts", style: TextStyle(color: Colors.white, fontSize: 28, fontWeight: FontWeight.w900)),
-            ],
-          ),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-            decoration: BoxDecoration(color: Colors.white.withOpacity(0.2), borderRadius: BorderRadius.circular(15)),
-            child: const Text("Redeem", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-          )
-        ],
-      ),
-    );
-  }
+  // Se eliminó el widget _buildLoyaltyCard()
 
   Widget _buildMenuSection(BuildContext context, UserModel user) {
     return Container(
